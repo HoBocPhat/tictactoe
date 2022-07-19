@@ -47,10 +47,11 @@ android {
         applicationId "com.example.caro_game"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion 19
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -60,6 +61,26 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    flavorDimensions "flavors"
+    productFlavors {
+        dev {
+            dimension "flavors"
+            applicationIdSuffix ".dev"
+            resValue "string", "app_name", "[dev] TicTacToe"
+            versionNameSuffix "-dev"
+        }
+        stag {
+            dimension "flavors"
+            applicationIdSuffix ".stag"
+            resValue "string", "app_name", "[stag] TicTacToe"
+            versionNameSuffix "-stag"
+        }
+        prod {
+            resValue "string", "app_name", "[pro] TicTacToe"
+            dimension "flavors"
+        }
+
+    }
 }
 
 flutter {
@@ -68,4 +89,8 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation platform('com.google.firebase:firebase-bom:30.2.0')
+    implementation 'com.google.firebase:firebase-analytics'
 }
+
+apply plugin: "com.google.gms.google-services"

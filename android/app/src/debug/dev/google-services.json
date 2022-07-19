@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "933474085254",
+    "project_id": "tictactoe-dev-aa9e2",
+    "storage_bucket": "tictactoe-dev-aa9e2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:933474085254:android:50ed9cb43dcd7395722407",
+        "android_client_info": {
+          "package_name": "com.example.caro_game.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "933474085254-qgv11kjps02e5o34pprfen0fkh606n7u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhTbrchEbYbyzsnl8nzTgJlRbK3_CMnQU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "933474085254-qgv11kjps02e5o34pprfen0fkh606n7u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
