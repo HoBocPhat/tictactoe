@@ -10,11 +10,16 @@ class WelcomeInitial extends WelcomeState{
 
 }
 
+class HighScoreLoading extends WelcomeState{
+  @override
+  List<Object?> get props => [];
+
+}
+
 class HighScoreLoaded extends WelcomeState{
   final List<String> data;
 
   @override
-  // TODO: implement props
   List<Object?> get props => [data];
 
   HighScoreLoaded(this.data);

@@ -29,6 +29,7 @@ class DefaultAppStyles implements AppStyles {
       bodyText1: TextStyle(fontSize: 14, fontWeight: AppFontWeight.regular),
       bodyText2: TextStyle(fontSize: 10, fontWeight: AppFontWeight.regular)
     ),
+      fontFamily: 'PermanentMarker'
   );
 
   @override
@@ -67,6 +68,7 @@ class BrightAppStyles implements AppStyles {
         bodyText1: TextStyle(fontSize: 14, fontWeight: AppFontWeight.regular),
         bodyText2: TextStyle(fontSize: 10, fontWeight: AppFontWeight.regular)
     ),
+      fontFamily: 'PermanentMarker'
   );
 
   @override

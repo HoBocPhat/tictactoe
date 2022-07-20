@@ -11,6 +11,7 @@ class WelcomeCubit extends Cubit<WelcomeState>{
   Future<List<String>> getHighScoreIds () async{
     List<String> ids = [];
     try{
+      emit(HighScoreLoading());
       ids = await repo.getDocId();
       emit(HighScoreLoaded(ids));
     } catch (err){

@@ -1,16 +1,12 @@
 
 import 'package:caro_game/app/cubit/app_cubit.dart';
-import 'package:caro_game/commons/widgets/high_score_tile.dart';
 import 'package:caro_game/commons/widgets/custom_dialog.dart';
 import 'package:caro_game/commons/widgets/submit_button.dart';
 import 'package:caro_game/modules/play/cubit/play_cubit.dart';
 import 'package:caro_game/modules/play/cubit/play_state.dart';
-import 'package:caro_game/modules/welcome/welcome_page.dart';
 import 'package:caro_game/repository/play_repo.dart';
 import 'package:flutter/material.dart';
-import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:confetti/confetti.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:caro_game/commons/widgets/blank_space.dart';
 import 'package:caro_game/commons/widgets/user1_space.dart';
@@ -110,7 +106,9 @@ class _PlayPageState extends State<PlayPage> {
                                 style: appCubit.styles.defaultHeadlineStyle(),
                               ),
                               Text("${widget.namePlayer2} SCORE: $scoreUser2",
-                                  style: appCubit.styles.defaultHeadlineStyle())
+                                  style: appCubit.styles.defaultHeadlineStyle()),
+                              count == 1 ? Text("${widget.namePlayer1} turn", style: appCubit.styles.defaultHeadlineStyle(),)
+                                  : Text("${widget.namePlayer2} turn", style: appCubit.styles.defaultHeadlineStyle(),)
                             ],
                           )
                         : Row(
@@ -121,7 +119,9 @@ class _PlayPageState extends State<PlayPage> {
                                 style: appCubit.styles.defaultHeadlineStyle(),
                               ),
                               Text("${widget.namePlayer2} SCORE: $scoreUser2",
-                                  style: appCubit.styles.defaultHeadlineStyle())
+                                  style: appCubit.styles.defaultHeadlineStyle()),
+                              count == 1 ? Text("${widget.namePlayer1} turn", style: appCubit.styles.defaultHeadlineStyle(),)
+                                  : Text("${widget.namePlayer2} turn", style: appCubit.styles.defaultHeadlineStyle(),)
                             ],
                           )),
                 Expanded(

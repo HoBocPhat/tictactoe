@@ -1,11 +1,9 @@
-import 'package:caro_game/commons/utils/styles.dart';
 import 'package:caro_game/commons/widgets/submit_button.dart';
 import 'package:caro_game/commons/widgets/text_input.dart';
 import 'package:caro_game/modules/play/play_page.dart';
 import 'package:caro_game/modules/welcome/cubit/welcome_cubit.dart';
 import 'package:caro_game/modules/welcome/cubit/welcome_state.dart';
 import 'package:caro_game/repository/welcome_repo.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:caro_game/commons/widgets/high_score_tile.dart';
@@ -23,7 +21,7 @@ class WelcomePage extends StatefulWidget {
 class _WelcomePageState extends State<WelcomePage> {
   static const _gap = SizedBox(height: 10);
   late TextEditingController namePlayer1Controller;
-  late TextEditingController namePlayer2rController;
+  late TextEditingController namePlayer2Controller;
   List<String> highScoreDocIds = [];
   late WelcomeCubit welcomeCubit;
   late WelcomeRepository welcomeRepository;
@@ -33,7 +31,7 @@ class _WelcomePageState extends State<WelcomePage> {
   void initState() {
     appCubit = context.read<AppCubit>();
     namePlayer1Controller = TextEditingController();
-    namePlayer2rController = TextEditingController();
+    namePlayer2Controller = TextEditingController();
     welcomeRepository = WelcomeRepository();
     welcomeCubit = WelcomeCubit(welcomeRepository);
     super.initState();
@@ -42,7 +40,7 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   void dispose() {
     namePlayer1Controller.dispose();
-    namePlayer2rController.dispose();
+    namePlayer2Controller.dispose();
     super.dispose();
   }
 
@@ -69,25 +67,23 @@ class _WelcomePageState extends State<WelcomePage> {
                         backgroundColor: appCubit.styles.themeData?.backgroundColor,
                         content: Form(
                           child: SizedBox(
-                            height: 200,
+                            height: 240,
                             width: MediaQuery.of(context).size.width,
                               child: SingleChildScrollView(
                                 child: Column(
                                   children: [
                                     TextInput(labelText: "Name Player 1", controller: namePlayer1Controller),
                                     const SizedBox(height: 20),
-                                    TextInput(labelText: "Name Player 2", controller: namePlayer2rController),
+                                    TextInput(labelText: "Name Player 2", controller: namePlayer2Controller),
                                     const SizedBox(height: 20),
                                     Center(
                                         child: SubmitButton(
                                           label: "PLAY",
                                           submit: (){
-                                            namePlayer1Controller.clear();
-                                            namePlayer2rController.clear();
                                             Navigator.pop(context);
                                             Navigator.push(context, MaterialPageRoute(builder: (context)
                                             => PlayPage(namePlayer1: namePlayer1Controller.text,
-                                                namePlayer2: namePlayer2rController.text)));
+                                                namePlayer2: namePlayer2Controller.text)));
                                           },
                                         )
                                     )
