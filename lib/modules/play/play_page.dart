@@ -1,8 +1,12 @@
 
+import 'package:caro_game/app/cubit/app_cubit.dart';
 import 'package:caro_game/commons/widgets/high_score_tile.dart';
 import 'package:caro_game/commons/widgets/custom_dialog.dart';
 import 'package:caro_game/commons/widgets/submit_button.dart';
+import 'package:caro_game/modules/play/cubit/play_cubit.dart';
+import 'package:caro_game/modules/play/cubit/play_state.dart';
 import 'package:caro_game/modules/welcome/welcome_page.dart';
+import 'package:caro_game/repository/play_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:confetti/confetti.dart';
@@ -12,6 +16,9 @@ import 'package:caro_game/commons/widgets/blank_space.dart';
 import 'package:caro_game/commons/widgets/user1_space.dart';
 import 'package:caro_game/commons/widgets/user2_space.dart';
 import 'package:caro_game/models/position.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../models/score.dart';
 
 
 class PlayPage extends StatefulWidget {
@@ -24,31 +31,18 @@ class PlayPage extends StatefulWidget {
 }
 
 class _PlayPageState extends State<PlayPage> {
+  late AppCubit appCubit;
   late ConfettiController confettiController;
-  final assetsAudioPlayer = AssetsAudioPlayer();
+  late PlayCubit playCubit;
+  late PlayRepository playRepository;
+  List<Position> pos = [];
   List<Position> user1Pos = [];
   List<Position> user2Pos = [];
   int number = 100;
   int count = 1;
   int scoreUser1 = 0;
   int scoreUser2 = 0;
-
-
-  void submitScore () {
-    var database = FirebaseFirestore.instance;
-    database.collection("scores").add({
-      "name": widget.namePlayer1,
-      "score": scoreUser1}
-    );
-    database.collection("scores").add({
-      "name": widget.namePlayer2,
-      "score": scoreUser2}
-    );
-  }
-
-  void playAudio (AssetsAudioPlayer assetsAudioPlayer) async{
-    await assetsAudioPlayer.open(Audio('assets/audios/cheer.mp3'));
-  }
+  List<Score> scores = [];
 
   void user1Play(int x, int y) {
     setState(() {
@@ -64,78 +58,6 @@ class _PlayPageState extends State<PlayPage> {
     count = 1;
   }
 
-  bool winGame(int x, int y, List<Position> positions) {
-    int w = 0;
-    int k = x;
-    int h = y;
-    //kiem tra hang
-    while (positions.any((e) => e.x == k && e.y == y)) {
-      w++;
-      k++;
-    }
-    k = x - 1;
-    while (positions.any((e) => e.x == k && e.y == y)) {
-      w++;
-      k--;
-    }
-    if (w > 4) {
-      return true;
-    }
-    //kiem tra cot
-    w = 0;
-    while (positions.any((e) => e.x == x && e.y == h)) {
-      w++;
-      h++;
-    }
-    h = y - 1;
-    while (positions.any((e) => e.x == x && e.y == h)) {
-      w++;
-      h--;
-    }
-    if (w > 4) {
-      return true;
-    }
-    //kiem tra duong cheo 1
-    k = x;
-    h = y;
-    w = 0;
-    while (positions.any((e) => e.x == k && e.y == h)) {
-      w++;
-      k++;
-      h++;
-    }
-    k = x - 1;
-    h = y - 1;
-    while (positions.any((e) => e.x == k && e.y == h)) {
-      w++;
-      k--;
-      h--;
-    }
-    if (w > 4) {
-      return true;
-    }
-    k = x;
-    h = y;
-    w = 0;
-    //kiem tra duong cheo 2
-    while (positions.any((e) => e.x == k && e.y == h)) {
-      w++;
-      k++;
-      h--;
-    }
-    k = x - 1;
-    h = y + 1;
-    while (positions.any((e) => e.x == k && e.y == h)) {
-      w++;
-      k--;
-      h++;
-    }
-    if (w > 4) {
-      return true;
-    }
-    return false;
-  }
-
   bool unDo(int x, int y, List<Position> positions) {
     if (positions.last.x == x && positions.last.y == y) {
       setState(() {
@@ -148,14 +70,17 @@ class _PlayPageState extends State<PlayPage> {
 
   @override
   void initState() {
+    appCubit = context.read<AppCubit>();
     confettiController = ConfettiController();
+    playRepository = PlayRepository();
+    playCubit = PlayCubit(playRepository);
     //confettiController.play();
     super.initState();
   }
 
   @override
   void dispose() {
-    assetsAudioPlayer.dispose();
+
     confettiController.dispose();
     super.dispose();
   }
@@ -163,7 +88,11 @@ class _PlayPageState extends State<PlayPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black38,
+      appBar: AppBar(
+        iconTheme: IconThemeData(color: appCubit.styles.backgroundContainer()),
+        backgroundColor: appCubit.styles.themeData?.backgroundColor,
+      ),
+      backgroundColor: appCubit.styles.themeData?.backgroundColor,
       body: SafeArea(
         child: Stack(
           alignment: Alignment.center,
@@ -173,32 +102,26 @@ class _PlayPageState extends State<PlayPage> {
                 Expanded(
                     child: MediaQuery.of(context).orientation ==
                             Orientation.portrait
-                        ? Expanded(
-                          child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Text(
-                                  "${widget.namePlayer1} SCORE: $scoreUser1",
-                                  style: const TextStyle(
-                                      fontSize: 20, color: Colors.white),
-                                ),
-                                Text("${widget.namePlayer2} SCORE: $scoreUser2",
-                                    style: const TextStyle(
-                                        fontSize: 20, color: Colors.white))
-                              ],
-                            ),
-                        )
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Text(
+                                "${widget.namePlayer1} SCORE: $scoreUser1",
+                                style: appCubit.styles.defaultHeadlineStyle(),
+                              ),
+                              Text("${widget.namePlayer2} SCORE: $scoreUser2",
+                                  style: appCubit.styles.defaultHeadlineStyle())
+                            ],
+                          )
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Text(
                                 "${widget.namePlayer1} SCORE: $scoreUser1",
-                                style: const TextStyle(
-                                    fontSize: 20, color: Colors.white),
+                                style: appCubit.styles.defaultHeadlineStyle(),
                               ),
                               Text("${widget.namePlayer2} SCORE: $scoreUser2",
-                                  style: const TextStyle(
-                                      fontSize: 20, color: Colors.white))
+                                  style: appCubit.styles.defaultHeadlineStyle())
                             ],
                           )),
                 Expanded(
@@ -206,72 +129,77 @@ class _PlayPageState extends State<PlayPage> {
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: SingleChildScrollView(
-                        child: Row(
-                          children: List.generate(
-                              number,
-                              (x) => Column(
-                                    children: List.generate(number, (y) {
-                                      if (user1Pos
-                                          .any((e) => e.x == x && e.y == y)) {
-                                        return GestureDetector(
-                                            onTap: () {
-                                              if (count == 2) {
-                                                if (unDo(x, y, user1Pos)) {
-                                                  count = 1;
+                        child:  Row(
+                            children: List.generate(
+                                number,
+                                (x) => Column(
+                                      children: List.generate(number, (y) {
+                                        if (user1Pos
+                                            .any((e) => e.x == x && e.y == y)) {
+                                          return GestureDetector(
+                                              onTap: () {
+                                                if (count == 2) {
+                                                  if (unDo(x, y, user1Pos)) {
+                                                    count = 1;
+                                                  }
                                                 }
-                                              }
-                                            },
-                                            child: const User1Space());
-                                      }
-                                      if (user2Pos
-                                          .any((e) => e.x == x && e.y == y)) {
-                                        return GestureDetector(
-                                            onTap: () {
-                                              if (count == 1) {
-                                                if (unDo(x, y, user2Pos)) {
-                                                  count = 2;
+                                              },
+                                              child: const User1Space());
+                                        }
+                                        if (user2Pos
+                                            .any((e) => e.x == x && e.y == y)) {
+                                          return GestureDetector(
+                                              onTap: () {
+                                                if (count == 1) {
+                                                  if (unDo(x, y, user2Pos)) {
+                                                    count = 2;
+                                                  }
                                                 }
-                                              }
-                                            },
-                                            child: const User2Space());
-                                      } else {
-                                        return GestureDetector(
-                                            onTap: () {
-                                              if (count == 1) {
-                                                user1Play(x, y);
-                                                bool isWin =
-                                                    winGame(x, y, user1Pos);
-                                                if (isWin == true) {
-                                                  playAudio(assetsAudioPlayer);
-                                                  confettiController.play();
-                                                  scoreUser1++;
-                                                  showDialog(
-                                                      context: context,
-                                                      builder: (context) {
-                                                        return CustomDialog(name: widget.namePlayer1);
-                                                      });
-                                                }
-                                              } else if (count == 2) {
-                                                user2Play(x, y);
-                                                bool isWin =
-                                                    winGame(x, y, user2Pos);
-                                                if (isWin == true) {
-                                                  playAudio(assetsAudioPlayer);
-                                                  confettiController.play();
-                                                  scoreUser2++;
-                                                  showDialog(
-                                                      context: context,
-                                                      builder: (context) {
-                                                        return CustomDialog(name: widget.namePlayer2);
-                                                      });
-                                                }
-                                              }
-                                            },
-                                            child: const BlankSpace());
-                                      }
-                                    }),
-                                  )),
-                        ),
+                                              },
+                                              child: const User2Space());
+                                        } else {
+                                          return BlocBuilder<PlayCubit,PlayState>(
+                                            bloc: playCubit,
+                                            builder: (context, state) {
+                                              return GestureDetector(
+                                                  onTap: () {
+                                                    if (count == 1) {
+                                                      user1Play(x, y);
+                                                      bool isWin =
+                                                          playCubit.winGame(x, y, user1Pos);
+                                                      if (isWin == true) {
+                                                        playCubit.playAudio();
+                                                        confettiController.play();
+                                                        scoreUser1++;
+                                                        showDialog(
+                                                            context: context,
+                                                            builder: (context) {
+                                                              return CustomDialog(name: widget.namePlayer1);
+                                                            });
+                                                      }
+                                                    } else if (count == 2) {
+                                                      user2Play(x, y);
+                                                      bool isWin =
+                                                          playCubit.winGame(x, y, user2Pos);
+                                                      if (isWin == true) {
+                                                        playCubit.playAudio();
+                                                        confettiController.play();
+                                                        scoreUser2++;
+                                                        showDialog(
+                                                            context: context,
+                                                            builder: (context) {
+                                                              return CustomDialog(name: widget.namePlayer2);
+                                                            });
+                                                      }
+                                                    }
+                                                  },
+                                                  child: const BlankSpace());
+                                            }
+                                          );
+                                        }
+                                      }),
+                                    )),
+                          ),
                       ),
                     )),
                 Expanded(
@@ -289,11 +217,17 @@ class _PlayPageState extends State<PlayPage> {
                           });
                         },
                       ),
-                        SubmitButton(label: "SAVE SCORE", submit: (){
-                          submitScore();
-                          Navigator.pushReplacement(context, MaterialPageRoute(
-                              builder: (context)=> const WelcomePage()));
-                        })
+                        BlocBuilder<PlayCubit, PlayState>(
+                          bloc: playCubit,
+                          builder: (context, state) {
+                            return SubmitButton(label: "SAVE SCORE", submit: (){
+                              scores.add(Score(widget.namePlayer1, scoreUser1));
+                              scores.add(Score(widget.namePlayer2, scoreUser2));
+                              playCubit.submitScore(scores);
+                              Navigator.pop(context);
+                            });
+                          }
+                        )
                       ],
                     ))
               ],

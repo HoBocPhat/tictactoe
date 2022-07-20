@@ -1,3 +1,4 @@
+import 'package:caro_game/commons/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class SubmitButton extends StatefulWidget {
@@ -13,11 +14,11 @@ class _SubmitButtonState extends State<SubmitButton> {
   @override
   Widget build(BuildContext context) {
     return MaterialButton(
-        color: Colors.green,
+        color: AppColors.green,
         onPressed: (){
           widget.submit();
         }
-        , child: Text(widget.label, style: TextStyle(color: Colors.white)));
+        , child: Text(widget.label, style: const TextStyle(color: AppColors.white)));
   }
 }
 

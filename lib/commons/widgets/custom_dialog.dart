@@ -1,4 +1,6 @@
+import 'package:caro_game/app/cubit/app_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CustomDialog extends StatelessWidget {
   final String name;
@@ -6,13 +8,15 @@ class CustomDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppCubit appCubit = context.read<AppCubit>();
     return Dialog(
+      backgroundColor: appCubit.styles.themeData?.backgroundColor,
       elevation: 12,
       child: SizedBox(
         height: 100,
         child: Center(
           child: Text(
-              "$name WIN", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+              "$name WIN", style: appCubit.styles.defaultHeadlineStyle()),
         ),
       ),
     );

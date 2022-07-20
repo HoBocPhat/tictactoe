@@ -12,9 +12,16 @@ class AppCubit extends Cubit<AppState> {
 
   AppCubit(AppState state) : super(AppInitial());
 
-  void changeStyle(AppStyles styles) {
-    this.styles = styles;
-    emit(AppChangeStyleSuccess());
+  void changeStyle() {
+    if(styles.runtimeType == DefaultAppStyles){
+      styles = BrightAppStyles();
+      emit(AppChangeStyleSuccess());
+    }
+    else {
+      styles = DefaultAppStyles();
+      emit(AppChangeStyleSuccess());
+    }
+
   }
 
   Future<void> fetchLocale() async {

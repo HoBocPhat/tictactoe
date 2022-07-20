@@ -1,13 +1,14 @@
+import 'package:caro_game/app/cubit/app_cubit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HighScoreTile extends StatelessWidget {
   final String documentId;
   const HighScoreTile({Key? key, required this.documentId}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
+    AppCubit appCubit = context.read<AppCubit>();
     CollectionReference highscores = FirebaseFirestore.instance.collection('scores');
     return FutureBuilder<DocumentSnapshot>(
         future: highscores.doc(documentId).get(),
@@ -18,12 +19,12 @@ class HighScoreTile extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(data['name'], style: TextStyle(fontSize: 20),),
-                Text(data['score'].toString(), style: TextStyle(fontSize: 20),)
+                Text(data['name'], style: appCubit.styles.defaultHeadlineStyle()),
+                Text(data['score'].toString(), style:  appCubit.styles.defaultHeadlineStyle())
               ],
             );
           } else{
-            return Text("Loading ...");
+            return Text("Loading ...", style: appCubit.styles.defaultHeadlineStyle());
           }
 
       }
